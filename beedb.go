@@ -14,21 +14,22 @@ var OnDebug = false
 var PluralizeTableNames = false
 
 type Model struct {
-	Db              *sql.DB
-	TableName       string
-	LimitStr        int
-	OffsetStr       int
-	WhereStr        string
-	ParamStr        []interface{}
-	OrderStr        string
-	ColumnStr       string
-	PrimaryKey      string
-	JoinStr         string
-	GroupByStr      string
-	HavingStr       string
-	QuoteIdentifier string
-	ParamIdentifier string
-	ParamIteration  int
+	Db               *sql.DB
+	TableName        string
+	LimitStr         int
+	OffsetStr        int
+	WhereStr         string
+	ParamStr         []interface{}
+	OrderStr         string
+	ColumnStr        string
+	PrimaryKey       string
+	PrimaryKeySqlTag string
+	JoinStr          string
+	GroupByStr       string
+	HavingStr        string
+	QuoteIdentifier  string
+	ParamIdentifier  string
+	ParamIteration   int
 }
 
 /**
@@ -103,6 +104,7 @@ func (orm *Model) ScanPK(output interface{}) *Model {
 			bb := sliceElementType.Field(i).Tag
 			if bb.Get("beedb") == "PK" || reflect.ValueOf(bb).String() == "PK" {
 				orm.PrimaryKey = sliceElementType.Field(i).Name
+				orm.PrimaryKeySqlTag = bb.Get("sql")
 			}
 		}
 	} else {
@@ -111,6 +113,7 @@ func (orm *Model) ScanPK(output interface{}) *Model {
 			bb := tt.Field(i).Tag
 			if bb.Get("beedb") == "PK" || reflect.ValueOf(bb).String() == "PK" {
 				orm.PrimaryKey = tt.Field(i).Name
+				orm.PrimaryKeySqlTag = bb.Get("sql")
 			}
 		}
 	}
@@ -392,7 +395,11 @@ func (orm *Model) Save(output interface{}) error {
 	delete(results, orm.PrimaryKey)
 
 	if id == nil {
-		return fmt.Errorf("Unable to save because primary key %q was not found in struct", orm.PrimaryKey)
+		id = results[orm.PrimaryKeySqlTag]
+		delete(results, orm.PrimaryKeySqlTag)
+		if id == nil {
+			return fmt.Errorf("Unable to save because primary key %q was not found in struct", orm.PrimaryKey)
+		}
 	}
 
 	if reflect.ValueOf(id).Int() == 0 {
