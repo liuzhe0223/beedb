@@ -166,7 +166,7 @@ func (orm *Model) Find(output interface{}) error {
 		return err
 	}
 	if len(resultsSlice) == 0 {
-		return errors.New("No record found")
+		return ErrorNotFound
 	} else if len(resultsSlice) == 1 {
 		results := resultsSlice[0]
 		err := scanMapIntoStruct(output, results)
