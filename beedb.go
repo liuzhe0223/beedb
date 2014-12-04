@@ -195,7 +195,7 @@ func (orm *Model) FindAll(rowsSlicePtr interface{}) error {
 	}
 
 	if orm.TableName == "" {
-		orm.TableName = getTableName(getTypeName(rowsSlicePtr))
+		orm.TableName = getTableName(rowsSlicePtr)
 	}
 	// If we've already specific columns with Select(), use that
 	if orm.ColumnStr == "*" {
@@ -599,8 +599,7 @@ func (orm *Model) DeleteAll(rowsSlicePtr interface{}) (int64, error) {
 	defer orm.InitModel()
 	orm.ScanPK(rowsSlicePtr)
 	if orm.TableName == "" {
-		//TODO: fix table name
-		orm.TableName = getTableName(getTypeName(rowsSlicePtr))
+		orm.TableName = getTableName(rowsSlicePtr)
 	}
 	var ids []string
 	val := reflect.Indirect(reflect.ValueOf(rowsSlicePtr))

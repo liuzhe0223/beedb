@@ -8,18 +8,6 @@ import (
 	"time"
 )
 
-func getTypeName(obj interface{}) (typestr string) {
-	typ := reflect.TypeOf(obj)
-	typestr = typ.String()
-
-	lastDotIndex := strings.LastIndex(typestr, ".")
-	if lastDotIndex != -1 {
-		typestr = typestr[lastDotIndex+1:]
-	}
-
-	return
-}
-
 func snakeCasedName(name string) string {
 	newstr := make([]rune, 0)
 	firstTime := true
@@ -259,10 +247,14 @@ func StructName(s interface{}) string {
 
 func getTableName(s interface{}) string {
 	v := reflect.TypeOf(s)
-	if v.Kind() == reflect.String {
-		s2, _ := s.(string)
-		return snakeCasedName(s2)
+
+	if v.Kind() == reflect.Slice {
+		elemTyp := v.Elem()
+		s = reflect.New(elemTyp)
 	}
+
+	//TODO: verify typeof s is a struct now and err handle
+
 	tn := scanTableName(s)
 	if len(tn) > 0 {
 		return tn
