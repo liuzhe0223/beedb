@@ -222,6 +222,12 @@ func (orm *Model) FindAll(rowsSlicePtr interface{}) error {
 
 func (orm *Model) FindMap() (resultsSlice []map[string][]byte, err error) {
 	defer orm.InitModel()
+
+	if orm.TableName == "" {
+		err = errors.New("Can not find table name, please set table name manually.")
+		return
+	}
+
 	sqls := orm.generateSql()
 	if OnDebug {
 		fmt.Println(sqls)
