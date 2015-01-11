@@ -259,15 +259,21 @@ func StructName(s interface{}) string {
 
 func getTableName(s interface{}) string {
 	v := reflect.TypeOf(s)
-	if v.Kind() == reflect.String {
-		s2, _ := s.(string)
-		return snakeCasedName(s2)
+	if v.Kind() == reflect.Slice {
+		eltyp := v.Elem()
+		s = reflect.New(eltyp)
 	}
+
+	v = reflect.TypeOf(s)
+	if v.Kind() != reflect.Struct {
+		return ""
+	}
+
 	tn := scanTableName(s)
 	if len(tn) > 0 {
 		return tn
 	}
-	return getTableName(StructName(s))
+	return snakeCasedName(StructName(s))
 }
 
 func scanTableName(s interface{}) string {
@@ -289,8 +295,8 @@ func scanTableName(s interface{}) string {
 			}
 		}
 	}
-	return ""
 
+	return ""
 }
 
 func stringArrayContains(needle string, haystack []string) bool {
